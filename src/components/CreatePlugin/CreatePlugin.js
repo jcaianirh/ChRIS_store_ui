@@ -48,8 +48,6 @@ const formGroupsData = [
   },
 ];
 
-let newPlugin;
-
 class CreatePlugin extends Component {
   constructor() {
     super();
@@ -234,9 +232,12 @@ class CreatePlugin extends Component {
     const storeURL = process.env.REACT_APP_STORE_URL;
     const token = window.sessionStorage.getItem('AUTH_TOKEN');
     const client = new StoreClient(storeURL, { token });
-
+    let newPlugin;
     try {
       newPlugin = await client.addPlugin(pluginName, pluginImage, file, pluginRepo);
+      this.setState({
+        newPlugin,
+      });
     } catch ({ message }) {
       return this.handleError(message);
     }
@@ -250,9 +251,13 @@ class CreatePlugin extends Component {
     const { state } = this;
     const {
       dragOver, fileName, name, image, repo,
-      pluginRepresentation, fileError, formError, success,
+      pluginRepresentation, fileError, formError, success, newPlugin,
     } = state;
-
+    let pluginId;
+    if (newPlugin) {
+      pluginId = newPlugin.items[0].data.filter(dataItem =>
+        dataItem.name === 'id')[0].value;
+    }
     // generate formGroups based on data
     const formGroups = formGroupsData.map((formGroup) => {
       const { id, label, help } = formGroup;
@@ -340,8 +345,8 @@ class CreatePlugin extends Component {
                     {'Plugin was successfully created! '}
                     <Link
                       className="createplugin-success-message-link"
-                      to={`/plugin/${newPlugin.items[0].data[0].value}`}
-                      href={`/plugin/${newPlugin.items[0].data[0].value}`}
+                      to={`/plugin/${pluginId}`}
+                      href={`/plugin/${pluginId}`}
                     >
                       Click Here
                     </Link>
